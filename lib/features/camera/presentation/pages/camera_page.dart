@@ -45,12 +45,6 @@ class CameraView extends StatelessWidget {
               ),
             );
           } else if (state is PhotoSaved) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Photo saved successfully!'),
-                backgroundColor: Colors.green,
-              ),
-            );
             // Navigate to photo display page
             context.pushReplacement('/photo-display');
           }
