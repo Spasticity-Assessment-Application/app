@@ -1,5 +1,65 @@
 # POC - Spasticity Assessment Application
 
+## 🛠️ Installation sans IDE (ligne de commande)
+
+Ce guide explique comment installer et configurer le projet sans utiliser d'IDE graphique. Toutes les étapes peuvent être réalisées dans un terminal.
+
+### 1. Installer Flutter
+
+#### macOS
+
+```bash
+brew install --cask flutter
+```
+
+Ou, pour une installation manuelle :
+
+```bash
+git clone https://github.com/flutter/flutter.git -b stable
+echo 'export PATH="$(pwd)/flutter/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### Windows
+
+Téléchargez Flutter sur : https://docs.flutter.dev/get-started/install/windows
+
+#### Linux
+
+Voir : https://docs.flutter.dev/get-started/install/linux
+
+### 2. Ajouter Flutter au PATH
+
+Assurez-vous que le dossier `flutter/bin` est dans votre variable d'environnement PATH.
+
+### 3. Vérifier l'installation
+
+```bash
+flutter doctor
+```
+
+Suivez les instructions pour corriger les éventuels problèmes (Android Studio n'est pas obligatoire, mais il faut au moins un SDK Android ou Xcode pour iOS).
+
+### 4. (Optionnel) Installer Visual Studio Code
+
+VS Code est recommandé pour le confort, mais non obligatoire. Téléchargez-le sur : https://code.visualstudio.com/
+
+#### Extensions utiles (dans VS Code)
+
+- Flutter
+- Dart
+
+### 5. Cloner et lancer le projet
+
+```bash
+git clone https://github.com/Spasticity-Assessment-Application/POC.git
+cd POC
+flutter pub get
+flutter run
+```
+
+---
+
 Proof of Concept (POC) of a mobile application using a lightweight AI model to validate the feasibility of the spasticity assessment application.
 
 ## 📱 About the Project
