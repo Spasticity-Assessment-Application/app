@@ -1,55 +1,83 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import '../../../core/presentation/widgets/widgets.dart';
-import '../../../core/photo/app_photo_cubit.dart';
+
+import 'package:poc/core/presentation/widgets/primary_button.dart';
+import 'package:poc/core/presentation/widgets/secondary_button.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static const cameraRoute = '/camera';
-  static const photoDisplayRoute = '/photo-display';
-
-  Future<void> _pickFromGallery(BuildContext context) async {
-    final picker = ImagePicker();
-    final x = await picker.pickImage(source: ImageSource.gallery);
-    if (x == null) return;
-
-    // on envoie juste le path
-    context.read<AppPhotoCubit>().setCapturedPhoto(x.path);
-
-    // redirige vers la page d’affichage photo
-    if (context.mounted) {
-      context.push('/photo-display');
-    }
-  }
-
-  void _openCamera(BuildContext context) => context.push(cameraRoute);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Évaluation de la spasticité')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: AppActionButtonsWidget(
-            buttons: [
-              AppActionButton(
-                onPressed: () => _openCamera(context),
-                icon: Icons.camera_alt,
-                label: 'Prendre une photo',
-                backgroundColor: Colors.orange,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Spasticity',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      height: 200,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: Image.asset(
+                          'assets/logo_spasticity.png',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              AppActionButton(
-                onPressed: () => _pickFromGallery(context),
-                icon: Icons.photo_library,
-                label: 'Choisir une image',
-                backgroundColor: Colors.green,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PrimaryButton(
+                    label: 'Démarrer une analyse',
+                    height: 52,
+                    onPressed: () {
+                      context.push('/analyse');
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SecondaryButton(
+                    label: 'Trouver un patient',
+                    height: 52,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fonctionnalité à venir'),
+                        ),
+                      );
+                    },
+                    backgroundColor: const Color(0xFFEDEDED),
+                    borderColor: Colors.transparent,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

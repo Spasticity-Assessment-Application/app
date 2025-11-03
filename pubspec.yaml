@@ -69,6 +69,7 @@ flutter:
     - assets/models/
     - assets/models/mobilenet_v2.tflite
     - assets/models/labels.txt
+    - assets/logo_spasticity.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
