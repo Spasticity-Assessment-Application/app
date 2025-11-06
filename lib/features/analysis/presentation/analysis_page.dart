@@ -3,9 +3,34 @@ import 'package:go_router/go_router.dart';
 
 import 'package:poc/core/presentation/widgets/page_header.dart';
 import 'package:poc/core/presentation/widgets/oval_action_button.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 
 class AnalysisPage extends StatelessWidget {
   const AnalysisPage({super.key});
+
+  Future<void> _pickVideoFromGallery(BuildContext context) async {
+    try {
+      final picker = ImagePicker();
+      final XFile? file = await picker.pickVideo(
+        source: ImageSource.gallery,
+      );
+
+      if (file == null) {
+        return;
+      }
+
+      if (!context.mounted) return;
+
+      context.push('/video-confirm', extra: file.path);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Impossible d’importer la vidéo: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +39,7 @@ class AnalysisPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            PageHeader(
-              title: 'Analyse',
-              foregroundColor: Colors.black,
-              showBack: true,
-            ),
+            const PageHeader(title: 'Analyse', foregroundColor: Colors.black),
 
             const SizedBox(height: 16),
 
@@ -29,19 +50,18 @@ class AnalysisPage extends StatelessWidget {
                   children: [
                     OvalActionButton(
                       label: 'Prendre Vidéo',
-                      variant: OvalActionButtonVariant.dark,
-                      onTap: () {
-                        context.push('/camera-video');
-                      },
+                      onTap: () => context.push('/camera'),
+                      variant:
+                          OvalActionButtonVariant.values.first, 
                     ),
 
                     const SizedBox(height: 40),
+
                     OvalActionButton(
                       label: 'Importer Vidéo',
-                      variant: OvalActionButtonVariant.light,
-                      onTap: () {
-                        // TODO: ouvrir la galerie vidéo
-                      },
+                      onTap: () => _pickVideoFromGallery(context),
+                      variant:
+                          OvalActionButtonVariant.values.last, 
                     ),
                   ],
                 ),

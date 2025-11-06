@@ -39,21 +39,21 @@ class CameraView extends StatelessWidget {
         listener: (context, state) {
           if (state is CameraError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
             );
-          } else if (state is PhotoSaved) {
-            // Navigate to photo display page
+          }
+
+          else if (state is PhotoSaved) {
             context.pushReplacement('/photo-display');
+          }
+
+          else if (state is VideoSaved) {
+            context.push('/video-confirm', extra: state.videoPath);
           }
         },
         builder: (context, state) {
           if (state is CameraLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            );
+            return const Center(child: CircularProgressIndicator(color: Colors.white));
           }
 
           if (state is PhotoTakenPreview) {
@@ -64,21 +64,21 @@ class CameraView extends StatelessWidget {
             return CameraErrorWidget(message: state.message);
           }
 
-          if (state is CameraReady) {
+          if (state is CameraReady || state is VideoRecording) {
+            final controller = (state is CameraReady)
+                ? state.controller
+                : (state as VideoRecording).controller;
+
             return Stack(
               children: [
-                // Camera preview
-                Positioned.fill(child: CameraPreview(state.controller)),
-                // Camera controls
+                Positioned.fill(child: CameraPreview(controller)),
+     
                 CameraControlsWidget(state: state),
               ],
             );
           }
 
-          // Initial state or other states
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          );
+          return const Center(child: CircularProgressIndicator(color: Colors.white));
         },
       ),
     );

@@ -10,11 +10,17 @@ class CameraControlsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (state is! CameraReady) {
+
+    if (state is! CameraReady && state is! VideoRecording) {
       return const SizedBox.shrink();
     }
 
-    final cameraState = state as CameraReady;
+ 
+    final bool isRecording = state is VideoRecording;
+    final cameras = state is CameraReady ? (state as CameraReady).cameras : const <dynamic>[];
+
+
+    final bool isSaving = state is VideoSaving || state is PhotoSaving;
 
     return Positioned(
       bottom: 0,
@@ -26,36 +32,51 @@ class CameraControlsWidget extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-            colors: [Colors.black54, Colors.transparent],
+            colors: [
+      
+              Color(0x8A000000), 
+              Colors.transparent,
+            ],
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Button to switch camera
-            if (cameraState.cameras.length > 1)
+
+            if (!isRecording && cameras.length > 1)
               FloatingActionButton(
                 heroTag: "switch_camera",
-                onPressed: () => context.read<CameraCubit>().switchCamera(),
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                onPressed: isSaving ? null : () => context.read<CameraCubit>().switchCamera(),
+                backgroundColor: Colors.white.withValues(alpha: 0.20),
                 child: const Icon(Icons.switch_camera, color: Colors.white),
               )
             else
               const SizedBox(width: 56),
 
-            // Button to take photo
+         
             FloatingActionButton.large(
-              heroTag: "take_picture",
-              onPressed: state is PhotoSaving
+              heroTag: "shutter",
+              onPressed: isSaving
                   ? null
-                  : () => context.read<CameraCubit>().takePicture(),
-              backgroundColor: Colors.white,
-              child: state is PhotoSaving
+                  : () {
+                      final cubit = context.read<CameraCubit>();
+                      if (isRecording) {
+                        cubit.stopRecordingAndSave();
+                      } else {
+                        cubit.startRecording();
+                      }
+                    },
+              backgroundColor: isRecording ? Colors.red : Colors.white,
+              child: isSaving
                   ? const CircularProgressIndicator()
-                  : const Icon(Icons.camera_alt, color: Colors.black, size: 32),
+                  : Icon(
+                      isRecording ? Icons.stop : Icons.fiber_manual_record,
+                      color: isRecording ? Colors.white : Colors.red,
+                      size: 32,
+                    ),
             ),
 
-            // Space to maintain symmetry
+
             const SizedBox(width: 56),
           ],
         ),

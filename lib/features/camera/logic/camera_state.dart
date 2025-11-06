@@ -60,3 +60,22 @@ class PhotoSaved extends CameraState {
   @override
   List<Object?> get props => [imagePath];
 }
+
+
+class VideoRecording extends CameraState {
+  final CameraController controller;
+  VideoRecording(this.controller);
+
+  @override
+  List<Object?> get props => [controller];
+}
+
+class VideoSaving extends CameraState {}
+
+class VideoSaved extends CameraState {
+  final String videoPath; 
+  VideoSaved(this.videoPath);
+
+  @override
+  List<Object?> get props => [videoPath];
+}

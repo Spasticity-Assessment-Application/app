@@ -4,6 +4,7 @@ import 'package:poc/features/camera/camera.dart';
 import 'package:poc/features/photo_display/photo_display.dart';
 import 'package:poc/features/photo_display/presentation/pages/result_page.dart';
 import 'package:poc/features/analysis/presentation/analysis_page.dart';
+import 'package:poc/features/camera_video/presentation/video_confirm_page.dart';
 class AppRouter {
   GoRouter get router => GoRouter(
     initialLocation: '/home',
@@ -17,6 +18,13 @@ class AppRouter {
       GoRoute(path: '/result', builder: (context, state) => const ResultPage()),
       GoRoute(path: '/analyse',builder: (context, state) => const AnalysisPage(),
     ),
+      GoRoute(
+            path: '/video-confirm',
+            builder: (context, state) {
+              final videoPath = state.extra as String? ?? '';
+              return VideoConfirmPage(videoPath: videoPath);
+            },
+          ),
     ],
   );
 }
