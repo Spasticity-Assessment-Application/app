@@ -64,13 +64,7 @@ class HomePage extends StatelessWidget {
                   SecondaryButton(
                     label: 'Trouver un patient',
                     height: 52,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Fonctionnalité à venir'),
-                        ),
-                      );
-                    },
+                    onPressed: () => context.push('/patients'),
                     backgroundColor: const Color(0xFFEDEDED),
                     borderColor: Colors.transparent,
                   ),

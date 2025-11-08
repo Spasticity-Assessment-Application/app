@@ -33,7 +33,7 @@ class CameraCubit extends Cubit<CameraState> {
       _controller = CameraController(
         _cameras.first,
         ResolutionPreset.high,
-        enableAudio: true, 
+        enableAudio: false, 
       );
 
       await _controller!.initialize();
@@ -151,7 +151,7 @@ class CameraCubit extends Cubit<CameraState> {
       _controller = CameraController(
         nextCamera,
         ResolutionPreset.high,
-        enableAudio: true, 
+        enableAudio: false, 
       );
       await _controller!.initialize();
 
