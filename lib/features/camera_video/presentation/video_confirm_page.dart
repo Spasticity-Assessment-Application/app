@@ -31,7 +31,7 @@ class _VideoConfirmPageState extends State<VideoConfirmPage> {
     }
     _controller = VideoPlayerController.file(File(widget.videoPath))
       ..initialize().then((_) {
-
+        _controller.setVolume(0.0);
         _controller
           ..setLooping(true)
           ..play();
