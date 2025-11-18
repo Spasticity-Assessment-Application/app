@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:poc/core/presentation/widgets/page_header.dart';
 import 'package:poc/core/presentation/widgets/oval_action_button.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 
 class AnalysisPage extends StatelessWidget {
   const AnalysisPage({super.key});
@@ -13,9 +11,7 @@ class AnalysisPage extends StatelessWidget {
   Future<void> _pickVideoFromGallery(BuildContext context) async {
     try {
       final picker = ImagePicker();
-      final XFile? file = await picker.pickVideo(
-        source: ImageSource.gallery,
-      );
+      final XFile? file = await picker.pickVideo(source: ImageSource.gallery);
 
       if (file == null) {
         return;
@@ -51,8 +47,7 @@ class AnalysisPage extends StatelessWidget {
                     OvalActionButton(
                       label: 'Prendre Vidéo',
                       onTap: () => context.push('/camera'),
-                      variant:
-                          OvalActionButtonVariant.values.first, 
+                      variant: OvalActionButtonVariant.values.first,
                     ),
 
                     const SizedBox(height: 40),
@@ -60,8 +55,7 @@ class AnalysisPage extends StatelessWidget {
                     OvalActionButton(
                       label: 'Importer Vidéo',
                       onTap: () => _pickVideoFromGallery(context),
-                      variant:
-                          OvalActionButtonVariant.values.last, 
+                      variant: OvalActionButtonVariant.values.last,
                     ),
                   ],
                 ),

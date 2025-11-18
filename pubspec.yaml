@@ -40,10 +40,13 @@ dependencies:
   permission_handler: ^12.0.1
   path_provider: ^2.1.5
   equatable: ^2.0.7
-  tflite_flutter: ^0.11.0
   image: ^4.5.4
   video_player: ^2.9.1
   shared_preferences: ^2.3.2
+  csv: ^6.0.0
+  tflite_flutter: ^0.12.1
+  video_thumbnail: ^0.5.6
+  file_picker: ^10.3.6
 
 dev_dependencies:
   flutter_test:
@@ -69,8 +72,8 @@ flutter:
   # Assets pour les modèles ML et autres ressources
   assets:
     - assets/models/
-    - assets/models/mobilenet_v2.tflite
-    - assets/models/labels.txt
+    - assets/models/pose_model_dynamic.tflite
+    - assets/models/pose_model_float32.tflite
     - assets/logo_spasticity.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

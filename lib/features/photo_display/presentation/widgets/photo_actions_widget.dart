@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/photo/app_photo_cubit.dart';
 import '../../../../../core/presentation/widgets/widgets.dart';
-import 'package:poc/features/classifier/classifier.dart';
 
 class PhotoActionsWidget extends StatelessWidget {
   final DateTime? captureTime;
@@ -38,15 +37,10 @@ class PhotoActionsWidget extends StatelessWidget {
                 onPressed: () {
                   final photoPath = context.read<AppPhotoCubit>().currentPhotoPath;
                   if (photoPath == null) return;
-
-                  final cubit = context.read<ClassifierCubit>();
-
-                  // 1) lancer la classification
-                  cubit.classifyImage(photoPath);
-                  //if (context.mounted) context.push('/result');
-                  //j'ai juste mit des valeurs randoms pour tester
-                  //context.read<AppPhotoCubit>().analyzePhoto("Classe A", 0.87);
-                  context.push('/result');
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Analyse photo à implémenter')),
+                  );
                 },
                 icon: Icons.analytics,
                 label: 'Analyze Photo',

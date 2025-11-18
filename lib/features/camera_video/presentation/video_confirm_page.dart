@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
-
 import 'package:poc/core/presentation/widgets/page_header.dart';
 import 'package:poc/core/presentation/widgets/primary_button.dart';
 import 'package:poc/core/presentation/widgets/secondary_button.dart';
 
 class VideoConfirmPage extends StatefulWidget {
-  final String videoPath; 
+  final String videoPath;
 
   const VideoConfirmPage({super.key, required this.videoPath});
 
@@ -30,16 +29,17 @@ class _VideoConfirmPageState extends State<VideoConfirmPage> {
       return;
     }
     _controller = VideoPlayerController.file(File(widget.videoPath))
-      ..initialize().then((_) {
-
-        _controller
-          ..setLooping(true)
-          ..play();
-        if (mounted) setState(() {});
-      }).catchError((_) {
-        _initError = true;
-        if (mounted) setState(() {});
-      });
+      ..initialize()
+          .then((_) {
+            _controller
+              ..setLooping(true)
+              ..play();
+            if (mounted) setState(() {});
+          })
+          .catchError((_) {
+            _initError = true;
+            if (mounted) setState(() {});
+          });
   }
 
   @override
@@ -57,7 +57,10 @@ class _VideoConfirmPageState extends State<VideoConfirmPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const PageHeader(title: 'Confirmation', foregroundColor: Colors.black),
+            const PageHeader(
+              title: 'Confirmation',
+              foregroundColor: Colors.black,
+            ),
 
             Expanded(
               child: Padding(
@@ -75,7 +78,6 @@ class _VideoConfirmPageState extends State<VideoConfirmPage> {
                     label: 'Reprendre la vidéo',
                     height: 52,
                     onPressed: () {
- 
                       context.go('/camera');
                     },
                     backgroundColor: const Color(0xFFEDEDED),
@@ -86,7 +88,7 @@ class _VideoConfirmPageState extends State<VideoConfirmPage> {
                     label: "Démarrer l'analyse",
                     height: 52,
                     onPressed: () {
-                      context.push('/result', extra: widget.videoPath);
+                      context.push('/pose-setup', extra: widget.videoPath);
                     },
                   ),
                 ],

@@ -2,12 +2,12 @@ import 'package:go_router/go_router.dart';
 import 'package:poc/features/home/presentation/home_page.dart';
 import 'package:poc/features/camera/camera.dart';
 import 'package:poc/features/photo_display/photo_display.dart';
-import 'package:poc/features/photo_display/presentation/pages/result_page.dart';
 import 'package:poc/features/analysis/presentation/analysis_page.dart';
 import 'package:poc/features/camera_video/presentation/video_confirm_page.dart';
 import 'package:poc/features/patient/presentation/patients_page.dart';
 import 'package:poc/features/patient/presentation/add_patient_page.dart';
 import 'package:poc/features/patient/presentation/patient_detail_page.dart';
+import 'package:poc/features/pose_analysis/pose_analysis.dart';
 
 class AppRouter {
   GoRouter get router => GoRouter(
@@ -19,7 +19,6 @@ class AppRouter {
         path: '/photo-display',
         builder: (context, state) => const PhotoDisplayPage(),
       ),
-      GoRoute(path: '/result', builder: (context, state) => const ResultPage()),
       GoRoute(
         path: '/analyse',
         builder: (context, state) => const AnalysisPage(),
@@ -43,9 +42,24 @@ class AppRouter {
       GoRoute(
         path: '/patients/detail',
         builder: (context, state) {
-          final idx = state.extra as int?; // on passe l'index
+          final idx = state.extra as int?;
           return PatientDetailPage(index: idx ?? 0);
         },
+      ),
+      GoRoute(
+        path: '/pose-setup',
+        builder: (context, state) {
+          final videoPath = state.extra as String? ?? '';
+          return PoseSetupPage(videoPath: videoPath);
+        },
+      ),
+      GoRoute(
+        path: '/pose-loading',
+        builder: (context, state) => const PoseLoadingPage(),
+      ),
+      GoRoute(
+        path: '/pose-results',
+        builder: (context, state) => const PoseResultsPage(),
       ),
     ],
   );
