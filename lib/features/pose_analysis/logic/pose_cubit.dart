@@ -109,7 +109,7 @@ class PoseCubit extends Cubit<PoseState> {
             print('❌ Failed to decode image for frame $i');
             continue;
           }
-          
+
           final originalWidth = decodedImage.width;
           final originalHeight = decodedImage.height;
           print('✅ Frame dimensions: ${originalWidth}x$originalHeight');
