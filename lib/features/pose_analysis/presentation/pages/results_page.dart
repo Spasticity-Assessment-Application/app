@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../../../../core/presentation/widgets/primary_button.dart';
 import '../../../../core/presentation/widgets/secondary_button.dart';
 import '../../logic/pose_cubit.dart';
 import '../../logic/pose_state.dart';
+import '../widgets/pose_visualization_player.dart';
 
 class PoseResultsPage extends StatelessWidget {
   const PoseResultsPage({super.key});
@@ -36,6 +38,10 @@ class PoseResultsPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        PoseVisualizationPlayer(
+                          analysisResults: state.analysisResults,
+                        ),
+                        const SizedBox(height: 16),
                         _buildSummaryCard(state),
                         const SizedBox(height: 16),
                         _buildKeypointsPreview(state),

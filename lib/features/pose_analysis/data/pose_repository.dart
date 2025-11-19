@@ -33,11 +33,13 @@ class FrameAnalysisResult {
   final int frameIndex;
   final List<Keypoint> keypoints;
   final DateTime timestamp;
+  final String imagePath;
 
   FrameAnalysisResult({
     required this.frameIndex,
     required this.keypoints,
     required this.timestamp,
+    required this.imagePath,
   });
 
   Map<String, dynamic> toMap() {
@@ -45,6 +47,7 @@ class FrameAnalysisResult {
       'frameIndex': frameIndex,
       'keypoints': keypoints.map((k) => k.toMap()).toList(),
       'timestamp': timestamp.toIso8601String(),
+      'imagePath': imagePath,
     };
   }
 }
@@ -194,6 +197,7 @@ class PoseRepository {
     int originalWidth,
     int originalHeight,
     double threshold,
+    String imagePath,
   ) async {
     final preprocessed = await preprocessFrame(frameBytes);
     final heatmaps = await runInference(preprocessed);
@@ -208,6 +212,7 @@ class PoseRepository {
       frameIndex: frameIndex,
       keypoints: keypoints,
       timestamp: DateTime.now(),
+      imagePath: imagePath,
     );
   }
 

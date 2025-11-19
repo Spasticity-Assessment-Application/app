@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:image/image.dart' as img;
 import '../data/pose_repository.dart';
 import 'pose_state.dart';
 
@@ -68,12 +69,12 @@ class PoseCubit extends Cubit<PoseState> {
       }
 
       print('✅ Video file found: $videoPath');
-      final tempDir = await getTemporaryDirectory();
+      final appDir = await getApplicationDocumentsDirectory();
       final framesDir = Directory(
-        '${tempDir.path}/pose_frames_${DateTime.now().millisecondsSinceEpoch}',
+        '${appDir.path}/pose_frames_${DateTime.now().millisecondsSinceEpoch}',
       );
       await framesDir.create(recursive: true);
-      print('✅ Temp directory created: ${framesDir.path}');
+      print('✅ Frames directory created: ${framesDir.path}');
 
       final totalFrames = setup.frameCount;
       final results = <FrameAnalysisResult>[];
@@ -103,12 +104,23 @@ class PoseCubit extends Cubit<PoseState> {
         print('✅ Frame bytes read: ${frameBytes.length} bytes');
 
         try {
+          final decodedImage = img.decodeImage(frameBytes);
+          if (decodedImage == null) {
+            print('❌ Failed to decode image for frame $i');
+            continue;
+          }
+          
+          final originalWidth = decodedImage.width;
+          final originalHeight = decodedImage.height;
+          print('✅ Frame dimensions: ${originalWidth}x$originalHeight');
+
           final result = await _repository.analyzeFrame(
             frameBytes,
             i,
-            192,
-            192,
+            originalWidth,
+            originalHeight,
             setup.threshold,
+            thumbnailPath,
           );
           print(
             '✅ Frame $i analyzed: ${result.keypoints.length} keypoints detected',
@@ -118,11 +130,7 @@ class PoseCubit extends Cubit<PoseState> {
           print('❌ Error analyzing frame $i: $e');
           print('Stack trace: ${StackTrace.current}');
         }
-
-        await frameFile.delete();
       }
-
-      await framesDir.delete(recursive: true);
       await _repository.dispose();
       print('✅ Analysis complete: ${results.length} frames processed');
 
@@ -131,6 +139,7 @@ class PoseCubit extends Cubit<PoseState> {
           analysisResults: results,
           videoPath: videoPath,
           analysisCompletedAt: DateTime.now(),
+          framesDirectory: framesDir.path,
         ),
       );
     } catch (e, stackTrace) {

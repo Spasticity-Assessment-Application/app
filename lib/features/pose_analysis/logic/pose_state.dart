@@ -60,11 +60,13 @@ class PoseResults extends PoseState {
   final List<FrameAnalysisResult> analysisResults;
   final String videoPath;
   final DateTime analysisCompletedAt;
+  final String framesDirectory;
 
   PoseResults({
     required this.analysisResults,
     required this.videoPath,
     required this.analysisCompletedAt,
+    required this.framesDirectory,
   });
 
   @override
