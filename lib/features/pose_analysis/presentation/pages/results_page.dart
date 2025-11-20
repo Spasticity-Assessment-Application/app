@@ -11,6 +11,12 @@ import '../../../../core/presentation/widgets/secondary_button.dart';
 import '../../logic/pose_cubit.dart';
 import '../../logic/pose_state.dart';
 import '../widgets/pose_visualization_player.dart';
+import 'dart:io';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
+import 'package:poc/core/data/patients_repository.dart';
+import 'package:poc/core/data/analysis_db.dart';
 
 class PoseResultsPage extends StatelessWidget {
   const PoseResultsPage({super.key});
@@ -54,10 +60,16 @@ class PoseResultsPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       PrimaryButton(
                         label: 'Exporter CSV',
                         onPressed: () => _exportToCsv(context, state),
+                      ),
+                      const SizedBox(height: 12),
+                      SecondaryButton(
+                        label: 'Enregistrer pour un patient',
+                        onPressed: () => _saveForPatient(context, state),
                       ),
                       const SizedBox(height: 12),
                       SecondaryButton(
@@ -341,5 +353,84 @@ class PoseResultsPage extends StatelessWidget {
     }
 
     return buffer.toString();
+  }
+
+  Future<void> _saveForPatient(BuildContext context, PoseResults state) async {
+    try {
+ 
+      final patients = await PatientsRepository.instance.load();
+
+      if (!context.mounted) return;
+
+      if (patients.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aucun patient. Ajoutez un patient avant.'),
+          ),
+        );
+        return;
+      }
+
+
+      final selectedEmail = await showModalBottomSheet<String>(
+        context: context,
+        builder: (ctx) {
+          return SafeArea(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: patients.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (_, i) {
+                final p = patients[i];
+                return ListTile(
+                  title: Text(p.name),
+                  subtitle: Text(p.email),
+                  onTap: () => Navigator.of(ctx).pop(p.email),
+                );
+              },
+            ),
+          );
+        },
+      );
+
+      if (selectedEmail == null) return;
+
+      final csvContent = _generateCsvContent(state);
+
+      final docsDir = await getApplicationDocumentsDirectory();
+      final patientFolder = Directory(
+        p.join(docsDir.path, 'analyses', selectedEmail),
+      );
+      await patientFolder.create(recursive: true);
+
+      final filename = 'analysis_${DateTime.now().millisecondsSinceEpoch}.csv';
+      final filePath = p.join(patientFolder.path, filename);
+
+      final file = File(filePath);
+      await file.writeAsString(csvContent);
+
+     
+      await AnalysisDb.instance.insertCsv(
+        patientEmail: selectedEmail,
+        csvPath: filePath,
+      );
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('CSV enregistré pour ce patient'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de l'enregistrement: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

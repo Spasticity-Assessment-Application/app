@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:poc/core/presentation/widgets/page_header.dart';
 import 'package:poc/core/presentation/widgets/primary_button.dart';
 import 'package:poc/core/presentation/widgets/secondary_button.dart';
 import 'package:poc/core/data/patients_repository.dart';
 import 'package:poc/features/patient/domain/patient.dart';
+import 'package:poc/core/data/analysis_db.dart';
 
 class PatientDetailPage extends StatefulWidget {
-  final int index; // index du patient dans la liste persistée
+  final int index; 
   const PatientDetailPage({super.key, required this.index});
 
   @override
@@ -20,6 +25,9 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
   Patient? _patient;
   bool _loading = true;
 
+ 
+  List<Map<String, dynamic>> _history = [];
+
   @override
   void initState() {
     super.initState();
@@ -29,26 +37,38 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
   Future<void> _load() async {
     final list = await _repo.load();
     if (!mounted) return;
+
     if (widget.index < 0 || widget.index >= list.length) {
-      context.pop(); // index invalide
+      context.pop(); 
       return;
     }
+
+    final p = list[widget.index];
+
+  
+    final history = await AnalysisDb.instance.getCsvForPatient(p.email);
+
+    if (!mounted) return;
     setState(() {
-      _patient = list[widget.index];
+      _patient = p;
+      _history = history;
       _loading = false;
     });
   }
 
   Future<void> _edit() async {
     if (_patient == null) return;
-    // On réutilise la page d’ajout comme éditeur : on lui passe les valeurs initiales
-    final result = await context.push('/patients/add', extra: {
-      'name': _patient!.name,
-      'email': _patient!.email,
-      'phone': _patient!.phone ?? '',
-      'notes': _patient!.notes ?? '',
-      'mode': 'edit',
-    });
+
+    final result = await context.push(
+      '/patients/add',
+      extra: {
+        'name': _patient!.name,
+        'email': _patient!.email,
+        'phone': _patient!.phone ?? '',
+        'notes': _patient!.notes ?? '',
+        'mode': 'edit',
+      },
+    );
 
     if (!mounted) return;
     if (result is Map<String, String>) {
@@ -70,8 +90,14 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
         title: const Text('Supprimer le patient ?'),
         content: const Text('Cette action est définitive.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Annuler')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Supprimer')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Supprimer'),
+          ),
         ],
       ),
     );
@@ -79,7 +105,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
 
     await _repo.delete(widget.index);
     if (!mounted) return;
-    context.pop(true); // retourne un flag pour rafraîchir la liste
+    context.pop(true); 
   }
 
   @override
@@ -90,6 +116,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
         body: SafeArea(child: Center(child: CircularProgressIndicator())),
       );
     }
+
     final p = _patient!;
     return Scaffold(
       backgroundColor: Colors.white,
@@ -100,20 +127,29 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
 
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 children: [
                   _InfoTile(label: 'Nom', value: p.name),
                   _InfoTile(label: 'Courriel', value: p.email),
                   _InfoTile(label: 'Téléphone', value: p.phone ?? '—'),
-                  _InfoTile(label: 'Notes', value: p.notes?.isNotEmpty == true ? p.notes! : '—'),
+                  _InfoTile(
+                    label: 'Notes',
+                    value: p.notes?.isNotEmpty == true ? p.notes! : '—',
+                  ),
 
                   const SizedBox(height: 16),
-                  const Text('Historique des analyses',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  const Text(
+                    'Historique des analyses',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                   const SizedBox(height: 8),
 
-                  // TODO: brancher ta vraie source d’historique
-                  _HistoryEmpty(),
+                  _history.isEmpty
+                      ? const _HistoryEmpty()
+                      : _HistoryList(history: _history),
                 ],
               ),
             ),
@@ -181,8 +217,7 @@ class _HistoryEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 120,
-      alignment: Alignment.center,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xFFF7F7F7),
         borderRadius: BorderRadius.circular(10),
@@ -190,7 +225,108 @@ class _HistoryEmpty extends StatelessWidget {
           BorderSide(color: Color(0xFFE6E6E6)),
         ),
       ),
-      child: const Text('Aucune analyse pour le moment'),
+      child: const Text(
+        'Aucune analyse enregistrée pour ce patient.',
+        style: TextStyle(fontSize: 13, color: Colors.black54),
+      ),
+    );
+  }
+}
+
+class _HistoryList extends StatelessWidget {
+  final List<Map<String, dynamic>> history;
+  const _HistoryList({required this.history});
+
+  Future<void> _exportCsv(BuildContext context, String csvPath) async {
+    try {
+      final file = File(csvPath);
+      if (!await file.exists()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Fichier introuvable sur l'appareil."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+
+      final bytes = await file.readAsBytes();
+
+
+      final savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Exporter le CSV',
+        fileName: p.basename(csvPath),
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+        bytes: bytes, 
+      );
+
+      if (savePath == null) {
+     
+        return;
+      }
+
+      // Écrire les bytes à l’emplacement choisi
+      //final outFile = File(savePath);
+      //await outFile.writeAsBytes(bytes, flush: true);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('CSV exporté avec succès'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de l'export: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(10),
+        border: const Border.fromBorderSide(
+          BorderSide(color: Color(0xFFE6E6E6)),
+        ),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: history.length,
+        separatorBuilder: (_, __) =>
+            const Divider(height: 1, color: Color(0xFFE0E0E0)),
+        itemBuilder: (context, index) {
+          final row = history[index];
+          final createdAt = DateTime.tryParse(
+            row['created_at'] as String? ?? '',
+          );
+          final subtitle = createdAt != null
+              ? 'CSV du ${createdAt.toLocal()}'
+              : 'CSV enregistré';
+          final csvPath = row['csv_path'] as String;
+
+          return ListTile(
+            title: Text(
+              'Analyse ${index + 1}',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            subtitle: Text(
+              subtitle,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+            trailing: const Icon(Icons.download, size: 18),
+            onTap: () => _exportCsv(context, csvPath),
+          );
+        },
+      ),
     );
   }
 }
