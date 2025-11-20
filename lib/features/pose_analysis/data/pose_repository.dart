@@ -4,8 +4,8 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
 enum PoseModel {
-  dynamic('assets/models/pose_model_dynamic.tflite'),
-  float32('assets/models/pose_model_float32.tflite');
+  dynamic('assets/models/pose_model_dlc_dynamic.tflite'),
+  float32('assets/models/pose_model_dlc_float32.tflite');
 
   final String path;
   const PoseModel(this.path);
@@ -62,7 +62,7 @@ class PoseRepository {
   Interpreter? _interpreter;
   bool _isInitialized = false;
 
-  static const int _inputSize = 192;
+  static const int _inputSize = 256;
   static const int _outputSize = 64;
   static const int _numKeypoints = 3;
 
