@@ -34,12 +34,16 @@ class FrameAnalysisResult {
   final List<Keypoint> keypoints;
   final DateTime timestamp;
   final String imagePath;
+  final int imageWidth;
+  final int imageHeight;
 
   FrameAnalysisResult({
     required this.frameIndex,
     required this.keypoints,
     required this.timestamp,
     required this.imagePath,
+    required this.imageWidth,
+    required this.imageHeight,
   });
 
   Map<String, dynamic> toMap() {
@@ -48,6 +52,8 @@ class FrameAnalysisResult {
       'keypoints': keypoints.map((k) => k.toMap()).toList(),
       'timestamp': timestamp.toIso8601String(),
       'imagePath': imagePath,
+      'imageWidth': imageWidth,
+      'imageHeight': imageHeight,
     };
   }
 }
@@ -213,6 +219,8 @@ class PoseRepository {
       keypoints: keypoints,
       timestamp: DateTime.now(),
       imagePath: imagePath,
+      imageWidth: originalWidth,
+      imageHeight: originalHeight,
     );
   }
 

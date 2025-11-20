@@ -99,8 +99,14 @@ class PoseCubit extends Cubit<PoseState> {
         }
 
         print('✅ Frame $i extracted: $thumbnailPath');
+
+        final uniqueFramePath = '${framesDir.path}/frame_$i.jpg';
         final frameFile = File(thumbnailPath);
-        final frameBytes = await frameFile.readAsBytes();
+        await frameFile.rename(uniqueFramePath);
+        print('✅ Frame renamed to: $uniqueFramePath');
+
+        final renamedFile = File(uniqueFramePath);
+        final frameBytes = await renamedFile.readAsBytes();
         print('✅ Frame bytes read: ${frameBytes.length} bytes');
 
         try {
@@ -120,7 +126,7 @@ class PoseCubit extends Cubit<PoseState> {
             originalWidth,
             originalHeight,
             setup.threshold,
-            thumbnailPath,
+            uniqueFramePath,
           );
           print(
             '✅ Frame $i analyzed: ${result.keypoints.length} keypoints detected',

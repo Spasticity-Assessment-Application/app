@@ -39,7 +39,7 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
 
     setState(() => _isPlaying = true);
 
-    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
       if (_currentFrameIndex >= widget.analysisResults.length - 1) {
         _pause();
         setState(() => _currentFrameIndex = 0);
@@ -127,7 +127,8 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
                   CustomPaint(
                     painter: KeypointsPainter(
                       keypoints: currentResult.keypoints,
-                      imageFile: imageFile,
+                      imageWidth: currentResult.imageWidth,
+                      imageHeight: currentResult.imageHeight,
                     ),
                   ),
                 ],
@@ -193,12 +194,35 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
 
 class KeypointsPainter extends CustomPainter {
   final List<Keypoint> keypoints;
-  final File imageFile;
+  final int imageWidth;
+  final int imageHeight;
 
-  KeypointsPainter({required this.keypoints, required this.imageFile});
+  KeypointsPainter({
+    required this.keypoints,
+    required this.imageWidth,
+    required this.imageHeight,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (imageWidth == 0 || imageHeight == 0) return;
+
+    final double imageAspectRatio = imageWidth / imageHeight;
+    final double canvasAspectRatio = size.width / size.height;
+
+    double actualScaleX, actualScaleY;
+    double offsetX = 0, offsetY = 0;
+
+    if (canvasAspectRatio > imageAspectRatio) {
+      actualScaleY = size.height / imageHeight;
+      actualScaleX = actualScaleY;
+      offsetX = (size.width - (imageWidth * actualScaleX)) / 2;
+    } else {
+      actualScaleX = size.width / imageWidth;
+      actualScaleY = actualScaleX;
+      offsetY = (size.height - (imageHeight * actualScaleY)) / 2;
+    }
+
     final pointPaint = Paint()
       ..color = Colors.red
       ..style = PaintingStyle.fill;
@@ -213,8 +237,11 @@ class KeypointsPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     for (final kp in keypoints) {
-      canvas.drawCircle(Offset(kp.x, kp.y), 15, circlePaint);
-      canvas.drawCircle(Offset(kp.x, kp.y), 8, pointPaint);
+      final displayX = kp.x * actualScaleX + offsetX;
+      final displayY = kp.y * actualScaleY + offsetY;
+
+      canvas.drawCircle(Offset(displayX, displayY), 15, circlePaint);
+      canvas.drawCircle(Offset(displayX, displayY), 8, pointPaint);
     }
 
     if (keypoints.length >= 2) {
@@ -223,9 +250,14 @@ class KeypointsPainter extends CustomPainter {
       final genou = keypoints.firstWhere((kp) => kp.name == 'Genou',
           orElse: () => keypoints.first);
 
+      final hancheDx = hanche.x * actualScaleX + offsetX;
+      final hancheDy = hanche.y * actualScaleY + offsetY;
+      final genouDx = genou.x * actualScaleX + offsetX;
+      final genouDy = genou.y * actualScaleY + offsetY;
+
       canvas.drawLine(
-        Offset(hanche.x, hanche.y),
-        Offset(genou.x, genou.y),
+        Offset(hancheDx, hancheDy),
+        Offset(genouDx, genouDy),
         linePaint,
       );
     }
@@ -236,9 +268,14 @@ class KeypointsPainter extends CustomPainter {
       final cheville = keypoints.firstWhere((kp) => kp.name == 'Cheville',
           orElse: () => keypoints.last);
 
+      final genouDx = genou.x * actualScaleX + offsetX;
+      final genouDy = genou.y * actualScaleY + offsetY;
+      final chevilleDx = cheville.x * actualScaleX + offsetX;
+      final chevilleDy = cheville.y * actualScaleY + offsetY;
+
       canvas.drawLine(
-        Offset(genou.x, genou.y),
-        Offset(cheville.x, cheville.y),
+        Offset(genouDx, genouDy),
+        Offset(chevilleDx, chevilleDy),
         linePaint,
       );
     }
