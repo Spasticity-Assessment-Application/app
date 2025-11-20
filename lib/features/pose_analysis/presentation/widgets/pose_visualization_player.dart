@@ -6,10 +6,7 @@ import '../../data/pose_repository.dart';
 class PoseVisualizationPlayer extends StatefulWidget {
   final List<FrameAnalysisResult> analysisResults;
 
-  const PoseVisualizationPlayer({
-    super.key,
-    required this.analysisResults,
-  });
+  const PoseVisualizationPlayer({super.key, required this.analysisResults});
 
   @override
   State<PoseVisualizationPlayer> createState() =>
@@ -120,10 +117,7 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.file(
-                    imageFile,
-                    fit: BoxFit.contain,
-                  ),
+                  Image.file(imageFile, fit: BoxFit.contain),
                   CustomPaint(
                     painter: KeypointsPainter(
                       keypoints: currentResult.keypoints,
@@ -148,7 +142,10 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
                           _seekToFrame(_currentFrameIndex - 1);
                         }
                       },
-                      icon: const Icon(Icons.skip_previous, color: Colors.white),
+                      icon: const Icon(
+                        Icons.skip_previous,
+                        color: Colors.white,
+                      ),
                     ),
                     IconButton(
                       onPressed: _togglePlayPause,
@@ -160,7 +157,8 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
                     ),
                     IconButton(
                       onPressed: () {
-                        if (_currentFrameIndex < widget.analysisResults.length - 1) {
+                        if (_currentFrameIndex <
+                            widget.analysisResults.length - 1) {
                           _seekToFrame(_currentFrameIndex + 1);
                         }
                       },
@@ -245,10 +243,14 @@ class KeypointsPainter extends CustomPainter {
     }
 
     if (keypoints.length >= 2) {
-      final hanche = keypoints.firstWhere((kp) => kp.name == 'Hanche',
-          orElse: () => keypoints.first);
-      final genou = keypoints.firstWhere((kp) => kp.name == 'Genou',
-          orElse: () => keypoints.first);
+      final hanche = keypoints.firstWhere(
+        (kp) => kp.name == 'Hanche',
+        orElse: () => keypoints.first,
+      );
+      final genou = keypoints.firstWhere(
+        (kp) => kp.name == 'Genou',
+        orElse: () => keypoints.first,
+      );
 
       final hancheDx = hanche.x * actualScaleX + offsetX;
       final hancheDy = hanche.y * actualScaleY + offsetY;
@@ -263,10 +265,14 @@ class KeypointsPainter extends CustomPainter {
     }
 
     if (keypoints.length >= 3) {
-      final genou = keypoints.firstWhere((kp) => kp.name == 'Genou',
-          orElse: () => keypoints[1]);
-      final cheville = keypoints.firstWhere((kp) => kp.name == 'Cheville',
-          orElse: () => keypoints.last);
+      final genou = keypoints.firstWhere(
+        (kp) => kp.name == 'Genou',
+        orElse: () => keypoints[1],
+      );
+      final cheville = keypoints.firstWhere(
+        (kp) => kp.name == 'Cheville',
+        orElse: () => keypoints.last,
+      );
 
       final genouDx = genou.x * actualScaleX + offsetX;
       final genouDy = genou.y * actualScaleY + offsetY;
