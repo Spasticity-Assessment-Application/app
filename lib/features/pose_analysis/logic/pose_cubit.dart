@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:video_player/video_player.dart';
 import '../data/pose_repository.dart';
 import 'pose_state.dart';
 
@@ -69,6 +70,19 @@ class PoseCubit extends Cubit<PoseState> {
       }
 
       print('✅ Video file found: $videoPath');
+      
+      final controller = VideoPlayerController.file(videoFile);
+      await controller.initialize();
+      final duration = controller.value.duration;
+      await controller.dispose();
+      
+      final videoDurationSeconds = duration.inSeconds;
+      final videoDurationMs = duration.inMilliseconds;
+      print('📹 Video duration: ${duration} (${videoDurationSeconds}s, ${videoDurationMs}ms)');
+      
+      final maxFrames = setup.frameCount;
+      print('📹 Will extract $maxFrames frames (forced, will repeat/extrapolate if video is short)');
+
       final appDir = await getApplicationDocumentsDirectory();
       final framesDir = Directory(
         '${appDir.path}/pose_frames_${DateTime.now().millisecondsSinceEpoch}',
@@ -76,14 +90,16 @@ class PoseCubit extends Cubit<PoseState> {
       await framesDir.create(recursive: true);
       print('✅ Frames directory created: ${framesDir.path}');
 
-      final totalFrames = setup.frameCount;
+      final totalFrames = maxFrames;
       final results = <FrameAnalysisResult>[];
 
       for (int i = 0; i < totalFrames; i++) {
         emit(PoseLoading(currentFrame: i + 1, totalFrames: totalFrames));
         print('🔄 Processing frame ${i + 1}/$totalFrames');
 
-        final timeMs = (i * 1000).toInt();
+        // Calculate timestamp: distribute evenly over the requested duration
+        final timeMs = ((i * videoDurationMs) / (totalFrames - 1)).round();
+        print('⏰ Frame $i timestamp: ${timeMs}ms (video duration: ${videoDurationMs}ms)');
 
         final thumbnailPath = await VideoThumbnail.thumbnailFile(
           video: videoPath,
@@ -94,7 +110,7 @@ class PoseCubit extends Cubit<PoseState> {
         );
 
         if (thumbnailPath == null) {
-          print('⚠️ Failed to extract frame $i');
+          print('⚠️ Failed to extract frame $i (thumbnailPath is null)');
           continue;
         }
 
@@ -102,12 +118,31 @@ class PoseCubit extends Cubit<PoseState> {
 
         final uniqueFramePath = '${framesDir.path}/frame_$i.jpg';
         final frameFile = File(thumbnailPath);
+        
+        // Check if file exists and has content
+        if (!await frameFile.exists()) {
+          print('⚠️ Extracted file does not exist: $thumbnailPath');
+          continue;
+        }
+        
+        final fileSize = await frameFile.length();
+        if (fileSize == 0) {
+          print('⚠️ Extracted file is empty: $thumbnailPath');
+          continue;
+        }
+
+        // Rename the file
         await frameFile.rename(uniqueFramePath);
         print('✅ Frame renamed to: $uniqueFramePath');
 
         final renamedFile = File(uniqueFramePath);
         final frameBytes = await renamedFile.readAsBytes();
         print('✅ Frame bytes read: ${frameBytes.length} bytes');
+
+        if (frameBytes.isEmpty) {
+          print('⚠️ Frame bytes are empty for frame $i');
+          continue;
+        }
 
         try {
           final decodedImage = img.decodeImage(frameBytes);
@@ -138,7 +173,8 @@ class PoseCubit extends Cubit<PoseState> {
         }
       }
       await _repository.dispose();
-      print('✅ Analysis complete: ${results.length} frames processed');
+      print('✅ Analysis complete: ${results.length} frames processed successfully out of $totalFrames requested');
+      print('📊 Results summary: ${results.map((r) => 'Frame ${r.frameIndex}: ${r.keypoints.length} keypoints').join(', ')}');
 
       emit(
         PoseResults(

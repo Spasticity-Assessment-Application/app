@@ -36,10 +36,13 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
 
     setState(() => _isPlaying = true);
 
-    _timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      print('🎬 Timer tick: currentFrameIndex = $_currentFrameIndex, totalFrames = ${widget.analysisResults.length}');
+      
       if (_currentFrameIndex >= widget.analysisResults.length - 1) {
+        print('🎬 Reached end of frames, stopping playback');
         _pause();
-        setState(() => _currentFrameIndex = 0);
+        // Stay on the last frame instead of jumping
         return;
       }
 
@@ -82,6 +85,21 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
 
     final currentResult = widget.analysisResults[_currentFrameIndex];
     final imageFile = File(currentResult.imagePath);
+
+    // Check if image file exists
+    if (!imageFile.existsSync()) {
+      print('⚠️ Image file does not exist: ${currentResult.imagePath}');
+      return Container(
+        height: 300,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(child: Text('Image introuvable')),
+      );
+    }
+
+    print('🖼️ Displaying frame $_currentFrameIndex: ${currentResult.imagePath}');
 
     return Container(
       decoration: BoxDecoration(
