@@ -37,8 +37,10 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
     setState(() => _isPlaying = true);
 
     _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      print('🎬 Timer tick: currentFrameIndex = $_currentFrameIndex, totalFrames = ${widget.analysisResults.length}');
-      
+      print(
+        '🎬 Timer tick: currentFrameIndex = $_currentFrameIndex, totalFrames = ${widget.analysisResults.length}',
+      );
+
       if (_currentFrameIndex >= widget.analysisResults.length - 1) {
         print('🎬 Reached end of frames, stopping playback');
         _pause();
@@ -99,7 +101,9 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
       );
     }
 
-    print('🖼️ Displaying frame $_currentFrameIndex: ${currentResult.imagePath}');
+    print(
+      '🖼️ Displaying frame $_currentFrameIndex: ${currentResult.imagePath}',
+    );
 
     return Container(
       decoration: BoxDecoration(

@@ -70,18 +70,22 @@ class PoseCubit extends Cubit<PoseState> {
       }
 
       print('✅ Video file found: $videoPath');
-      
+
       final controller = VideoPlayerController.file(videoFile);
       await controller.initialize();
       final duration = controller.value.duration;
       await controller.dispose();
-      
+
       final videoDurationSeconds = duration.inSeconds;
       final videoDurationMs = duration.inMilliseconds;
-      print('📹 Video duration: ${duration} (${videoDurationSeconds}s, ${videoDurationMs}ms)');
-      
+      print(
+        '📹 Video duration: $duration (${videoDurationSeconds}s, ${videoDurationMs}ms)',
+      );
+
       final maxFrames = setup.frameCount;
-      print('📹 Will extract $maxFrames frames (forced, will repeat/extrapolate if video is short)');
+      print(
+        '📹 Will extract $maxFrames frames (forced, will repeat/extrapolate if video is short)',
+      );
 
       final appDir = await getApplicationDocumentsDirectory();
       final framesDir = Directory(
@@ -99,7 +103,9 @@ class PoseCubit extends Cubit<PoseState> {
 
         // Calculate timestamp: distribute evenly over the requested duration
         final timeMs = ((i * videoDurationMs) / (totalFrames - 1)).round();
-        print('⏰ Frame $i timestamp: ${timeMs}ms (video duration: ${videoDurationMs}ms)');
+        print(
+          '⏰ Frame $i timestamp: ${timeMs}ms (video duration: ${videoDurationMs}ms)',
+        );
 
         final thumbnailPath = await VideoThumbnail.thumbnailFile(
           video: videoPath,
@@ -118,13 +124,13 @@ class PoseCubit extends Cubit<PoseState> {
 
         final uniqueFramePath = '${framesDir.path}/frame_$i.jpg';
         final frameFile = File(thumbnailPath);
-        
+
         // Check if file exists and has content
         if (!await frameFile.exists()) {
           print('⚠️ Extracted file does not exist: $thumbnailPath');
           continue;
         }
-        
+
         final fileSize = await frameFile.length();
         if (fileSize == 0) {
           print('⚠️ Extracted file is empty: $thumbnailPath');
@@ -173,8 +179,12 @@ class PoseCubit extends Cubit<PoseState> {
         }
       }
       await _repository.dispose();
-      print('✅ Analysis complete: ${results.length} frames processed successfully out of $totalFrames requested');
-      print('📊 Results summary: ${results.map((r) => 'Frame ${r.frameIndex}: ${r.keypoints.length} keypoints').join(', ')}');
+      print(
+        '✅ Analysis complete: ${results.length} frames processed successfully out of $totalFrames requested',
+      );
+      print(
+        '📊 Results summary: ${results.map((r) => 'Frame ${r.frameIndex}: ${r.keypoints.length} keypoints').join(', ')}',
+      );
 
       emit(
         PoseResults(
