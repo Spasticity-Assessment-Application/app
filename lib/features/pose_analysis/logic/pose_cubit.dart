@@ -22,7 +22,7 @@ class PoseCubit extends Cubit<PoseState> {
   }) {
     emit(
       PoseSetup(
-        selectedModel: model ?? PoseModel.mnv3s,
+        selectedModel: model ?? PoseModel.mnv3l,
         frameCount: frameCount ?? 60,
         threshold: threshold ?? 0.0,
         isAdvancedMode: isAdvancedMode,

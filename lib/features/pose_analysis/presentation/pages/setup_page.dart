@@ -110,7 +110,7 @@ class PoseSetupView extends StatelessWidget {
                 onTap: () {
                   context.read<PoseCubit>().updateSetup(
                     isAdvancedMode: false,
-                    model: PoseModel.mnv3s,
+                    model: PoseModel.mnv3l,
                     frameCount: 60,
                     threshold: 0.0,
                   );
@@ -266,6 +266,15 @@ class PoseSetupView extends StatelessWidget {
     );
   }
 
+  String _getModelDisplayName(PoseModel model) {
+    switch (model) {
+      case PoseModel.mnv3l:
+        return 'MobileNetV3 Large (384×384)';
+      case PoseModel.mnv3s:
+        return 'MobileNetV3 Small (256×256)';
+    }
+  }
+
   Widget _buildCurrentSettings(PoseSetup state) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -285,7 +294,7 @@ class PoseSetupView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _buildSettingRow('Modèle', state.selectedModel.name),
+          _buildSettingRow('Modèle', _getModelDisplayName(state.selectedModel)),
           _buildSettingRow('Frames', '${state.frameCount}'),
           _buildSettingRow('Seuil', state.threshold.toStringAsFixed(2)),
         ],
