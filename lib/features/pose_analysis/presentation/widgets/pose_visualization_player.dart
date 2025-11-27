@@ -36,7 +36,7 @@ class _PoseVisualizationPlayerState extends State<PoseVisualizationPlayer> {
 
     setState(() => _isPlaying = true);
 
-    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
       print(
         '🎬 Timer tick: currentFrameIndex = $_currentFrameIndex, totalFrames = ${widget.analysisResults.length}',
       );

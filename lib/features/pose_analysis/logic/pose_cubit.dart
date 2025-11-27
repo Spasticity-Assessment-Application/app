@@ -36,17 +36,27 @@ class PoseCubit extends Cubit<PoseState> {
     double? threshold,
     bool? isAdvancedMode,
   }) {
+    PoseSetup currentSetup;
     if (state is PoseSetup) {
-      final currentSetup = state as PoseSetup;
-      emit(
-        currentSetup.copyWith(
-          selectedModel: model,
-          frameCount: frameCount,
-          threshold: threshold,
-          isAdvancedMode: isAdvancedMode,
-        ),
+      currentSetup = state as PoseSetup;
+    } else {
+      // Si l'état n'est pas PoseSetup, créer un état par défaut
+      currentSetup = PoseSetup(
+        selectedModel: PoseModel.mnv3l,
+        frameCount: 60,
+        threshold: 0.0,
+        isAdvancedMode: false,
       );
     }
+
+    emit(
+      currentSetup.copyWith(
+        selectedModel: model,
+        frameCount: frameCount,
+        threshold: threshold,
+        isAdvancedMode: isAdvancedMode,
+      ),
+    );
   }
 
   Future<void> analyzeVideo(String videoPath) async {
@@ -203,7 +213,13 @@ class PoseCubit extends Cubit<PoseState> {
   }
 
   void reset() {
-    emit(PoseInitial());
+    // Reset to setup page with default configuration
+    setupAnalysis(
+      isAdvancedMode: false,
+      model: PoseModel.mnv3l,
+      frameCount: 60,
+      threshold: 0.0,
+    );
   }
 
   @override
