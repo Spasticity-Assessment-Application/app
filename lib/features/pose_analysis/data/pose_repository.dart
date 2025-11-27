@@ -4,11 +4,13 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
 enum PoseModel {
-  dynamic('assets/models/pose_model_dlc_dynamic.tflite'),
-  float32('assets/models/pose_model_dlc_float32.tflite');
+  mnv3l('assets/models/pose_model_mnv3l_float32.tflite', 384, 96),
+  mnv3s('assets/models/pose_model_mnv3s_float32.tflite', 256, 64);
 
   final String path;
-  const PoseModel(this.path);
+  final int inputSize;
+  final int outputSize;
+  const PoseModel(this.path, this.inputSize, this.outputSize);
 }
 
 class Keypoint {
@@ -61,9 +63,8 @@ class FrameAnalysisResult {
 class PoseRepository {
   Interpreter? _interpreter;
   bool _isInitialized = false;
+  PoseModel? _currentModel;
 
-  static const int _inputSize = 256;
-  static const int _outputSize = 64;
   static const int _numKeypoints = 3;
 
   static const List<String> _keypointNames = ['Hanche', 'Genou', 'Cheville'];
@@ -75,12 +76,16 @@ class PoseRepository {
 
     try {
       print('🔵 Initializing model: ${model.path}');
+      print(
+        '📊 Model specs: input ${model.inputSize}x${model.inputSize}, output ${model.outputSize}x${model.outputSize}',
+      );
       final options = InterpreterOptions()..threads = 4;
 
       _interpreter = await Interpreter.fromAsset(model.path, options: options);
       print('✅ Interpreter created');
       _interpreter!.allocateTensors();
       print('✅ Tensors allocated');
+      _currentModel = model;
       _isInitialized = true;
       print('✅ Model initialized successfully');
     } catch (e, stackTrace) {
@@ -91,6 +96,10 @@ class PoseRepository {
   }
 
   Future<List<List<List<double>>>> preprocessFrame(Uint8List frameBytes) async {
+    if (_currentModel == null) {
+      throw PoseException('Model not initialized');
+    }
+
     try {
       print('🔵 Preprocessing frame: ${frameBytes.length} bytes');
       final image = img.decodeImage(frameBytes);
@@ -101,15 +110,17 @@ class PoseRepository {
 
       final resized = img.copyResize(
         image,
-        width: _inputSize,
-        height: _inputSize,
+        width: _currentModel!.inputSize,
+        height: _currentModel!.inputSize,
         interpolation: img.Interpolation.linear,
       );
-      print('✅ Image resized to ${_inputSize}x$_inputSize');
+      print(
+        '✅ Image resized to ${_currentModel!.inputSize}x${_currentModel!.inputSize}',
+      );
 
       final input = List.generate(
-        _inputSize,
-        (y) => List.generate(_inputSize, (x) {
+        _currentModel!.inputSize,
+        (y) => List.generate(_currentModel!.inputSize, (x) {
           final pixel = resized.getPixel(x, y);
           return [pixel.r / 255.0, pixel.g / 255.0, pixel.b / 255.0];
         }),
@@ -127,7 +138,7 @@ class PoseRepository {
   Future<List<List<List<double>>>> runInference(
     List<List<List<double>>> input,
   ) async {
-    if (!_isInitialized || _interpreter == null) {
+    if (!_isInitialized || _interpreter == null || _currentModel == null) {
       throw PoseException('Model not initialized');
     }
 
@@ -137,9 +148,9 @@ class PoseRepository {
       final output = List.generate(
         1,
         (_) => List.generate(
-          _outputSize,
+          _currentModel!.outputSize,
           (_) => List.generate(
-            _outputSize,
+            _currentModel!.outputSize,
             (_) => List<double>.filled(_numKeypoints, 0.0),
           ),
         ),
@@ -161,6 +172,10 @@ class PoseRepository {
     int originalHeight,
     double threshold,
   ) {
+    if (_currentModel == null) {
+      throw PoseException('Model not initialized');
+    }
+
     final keypoints = <Keypoint>[];
 
     for (int k = 0; k < _numKeypoints; k++) {
@@ -168,8 +183,8 @@ class PoseRepository {
       int maxY = 0;
       int maxX = 0;
 
-      for (int y = 0; y < _outputSize; y++) {
-        for (int x = 0; x < _outputSize; x++) {
+      for (int y = 0; y < _currentModel!.outputSize; y++) {
+        for (int x = 0; x < _currentModel!.outputSize; x++) {
           final val = heatmaps[y][x][k];
           if (val > maxVal) {
             maxVal = val;
@@ -180,8 +195,8 @@ class PoseRepository {
       }
 
       if (maxVal >= threshold) {
-        final scaledX = (maxX * originalWidth) / _outputSize;
-        final scaledY = (maxY * originalHeight) / _outputSize;
+        final scaledX = (maxX * originalWidth) / _currentModel!.outputSize;
+        final scaledY = (maxY * originalHeight) / _currentModel!.outputSize;
 
         keypoints.add(
           Keypoint(
@@ -227,6 +242,7 @@ class PoseRepository {
   Future<void> dispose() async {
     _interpreter?.close();
     _interpreter = null;
+    _currentModel = null;
     _isInitialized = false;
   }
 

@@ -110,7 +110,7 @@ class PoseSetupView extends StatelessWidget {
                 onTap: () {
                   context.read<PoseCubit>().updateSetup(
                     isAdvancedMode: false,
-                    model: PoseModel.float32,
+                    model: PoseModel.mnv3s,
                     frameCount: 60,
                     threshold: 0.0,
                   );
@@ -163,26 +163,22 @@ class PoseSetupView extends StatelessWidget {
           children: [
             Expanded(
               child: _OptionButton(
-                label: 'Dynamic',
-                subtitle: '~6MB',
-                isSelected: state.selectedModel == PoseModel.dynamic,
+                label: 'MobileNetV3 Large',
+                subtitle: '384×384 • Haute précision',
+                isSelected: state.selectedModel == PoseModel.mnv3l,
                 onTap: () {
-                  context.read<PoseCubit>().updateSetup(
-                    model: PoseModel.dynamic,
-                  );
+                  context.read<PoseCubit>().updateSetup(model: PoseModel.mnv3l);
                 },
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _OptionButton(
-                label: 'Float32',
-                subtitle: '~22MB',
-                isSelected: state.selectedModel == PoseModel.float32,
+                label: 'MobileNetV3 Small',
+                subtitle: '256×256 • Rapide',
+                isSelected: state.selectedModel == PoseModel.mnv3s,
                 onTap: () {
-                  context.read<PoseCubit>().updateSetup(
-                    model: PoseModel.float32,
-                  );
+                  context.read<PoseCubit>().updateSetup(model: PoseModel.mnv3s);
                 },
               ),
             ),
