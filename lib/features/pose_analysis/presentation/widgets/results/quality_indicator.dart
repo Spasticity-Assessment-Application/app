@@ -158,7 +158,8 @@ class QualityIndicator extends StatelessWidget {
   String _getQualityDescription(double confidence) {
     if (confidence >= 0.8) return 'Détection très fiable, résultats optimaux';
     if (confidence >= 0.6) return 'Bonne détection, résultats utilisables';
-    if (confidence >= 0.4) return 'Détection moyenne, à interpréter avec prudence';
+    if (confidence >= 0.4)
+      return 'Détection moyenne, à interpréter avec prudence';
     return 'Détection faible, vérification recommandée';
   }
 
@@ -196,10 +197,14 @@ class QualityIndicator extends StatelessWidget {
         return 'Cheville';
       default:
         // Pour les noms non reconnus, les rendre plus lisibles
-        return technicalName.replaceAll('_', ' ').split(' ').map((word) {
-          if (word.isEmpty) return '';
-          return word[0].toUpperCase() + word.substring(1).toLowerCase();
-        }).join(' ');
+        return technicalName
+            .replaceAll('_', ' ')
+            .split(' ')
+            .map((word) {
+              if (word.isEmpty) return '';
+              return word[0].toUpperCase() + word.substring(1).toLowerCase();
+            })
+            .join(' ');
     }
   }
 

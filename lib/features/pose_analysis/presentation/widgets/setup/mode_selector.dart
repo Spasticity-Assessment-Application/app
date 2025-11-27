@@ -28,10 +28,7 @@ class ModeSelector extends StatelessWidget {
             const SizedBox(height: 8),
             const Text(
               'Choisissez le niveau de précision selon vos besoins cliniques',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
             const SizedBox(height: 12),
             Row(
@@ -58,7 +55,9 @@ class ModeSelector extends StatelessWidget {
                     subtitle: 'Pour ajustements spécifiques',
                     isSelected: state.isAdvancedMode,
                     onTap: () {
-                      context.read<PoseCubit>().updateSetup(isAdvancedMode: true);
+                      context.read<PoseCubit>().updateSetup(
+                        isAdvancedMode: true,
+                      );
                     },
                   ),
                 ),

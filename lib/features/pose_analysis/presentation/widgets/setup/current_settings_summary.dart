@@ -27,9 +27,15 @@ class CurrentSettingsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _buildSettingRow('Précision', _getModelDisplayName(state.selectedModel)),
+          _buildSettingRow(
+            'Précision',
+            _getModelDisplayName(state.selectedModel),
+          ),
           _buildSettingRow('Échantillonnage', '${state.frameCount} images/sec'),
-          _buildSettingRow('Sensibilité', '${(state.threshold * 100).toInt()}%'),
+          _buildSettingRow(
+            'Sensibilité',
+            '${(state.threshold * 100).toInt()}%',
+          ),
         ],
       ),
     );

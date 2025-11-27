@@ -144,7 +144,6 @@ class PoseResultsPage extends StatelessWidget {
 
   Future<void> _saveForPatient(BuildContext context, PoseResults state) async {
     try {
- 
       final patients = await PatientsRepository.instance.load();
 
       if (!context.mounted) return;
@@ -157,7 +156,6 @@ class PoseResultsPage extends StatelessWidget {
         );
         return;
       }
-
 
       final selectedEmail = await showModalBottomSheet<String>(
         context: context,
@@ -196,7 +194,6 @@ class PoseResultsPage extends StatelessWidget {
       final file = File(filePath);
       await file.writeAsString(csvContent);
 
-     
       await AnalysisDb.instance.insertCsv(
         patientEmail: selectedEmail,
         csvPath: filePath,

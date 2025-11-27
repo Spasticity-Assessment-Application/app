@@ -98,10 +98,7 @@ class AdvancedSettings extends StatelessWidget {
         const SizedBox(height: 4),
         const Text(
           'Nombre d\'images analysées par seconde de vidéo',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.black54),
         ),
         Slider(
           value: state.frameCount.toDouble(),
@@ -145,10 +142,7 @@ class AdvancedSettings extends StatelessWidget {
         const SizedBox(height: 4),
         const Text(
           'Niveau minimum de confiance pour considérer une détection valide',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.black54),
         ),
         Slider(
           value: state.threshold,
