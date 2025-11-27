@@ -27,7 +27,7 @@ class PhotoActionsWidget extends StatelessWidget {
                 onPressed: () {
                   // Clear current photo and go back to camera
                   context.read<AppPhotoCubit>().clearCapturedPhoto();
-                  context.pushReplacement('/camera');
+                  context.push('/camera');
                 },
                 icon: Icons.camera_alt,
                 label: 'Retake Photo',
@@ -35,11 +35,15 @@ class PhotoActionsWidget extends StatelessWidget {
               ),
               AppActionButton(
                 onPressed: () {
-                  final photoPath = context.read<AppPhotoCubit>().currentPhotoPath;
+                  final photoPath = context
+                      .read<AppPhotoCubit>()
+                      .currentPhotoPath;
                   if (photoPath == null) return;
-                  
+
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Analyse photo à implémenter')),
+                    const SnackBar(
+                      content: Text('Analyse photo à implémenter'),
+                    ),
                   );
                 },
                 icon: Icons.analytics,

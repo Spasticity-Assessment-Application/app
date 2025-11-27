@@ -33,27 +33,38 @@ class CameraView extends StatelessWidget {
         title: const Text('Camera'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
+        ),
       ),
       backgroundColor: Colors.black,
       body: BlocConsumer<CameraCubit, CameraState>(
         listener: (context, state) {
           if (state is CameraError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
-          }
-
-          else if (state is PhotoSaved) {
+          } else if (state is PhotoSaved) {
             context.pushReplacement('/photo-display');
-          }
-
-          else if (state is VideoSaved) {
+          } else if (state is VideoSaved) {
             context.push('/video-confirm', extra: state.videoPath);
           }
         },
         builder: (context, state) {
           if (state is CameraLoading) {
-            return const Center(child: CircularProgressIndicator(color: Colors.white));
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            );
           }
 
           if (state is PhotoTakenPreview) {
@@ -72,13 +83,15 @@ class CameraView extends StatelessWidget {
             return Stack(
               children: [
                 Positioned.fill(child: CameraPreview(controller)),
-     
+
                 CameraControlsWidget(state: state),
               ],
             );
           }
 
-          return const Center(child: CircularProgressIndicator(color: Colors.white));
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
         },
       ),
     );

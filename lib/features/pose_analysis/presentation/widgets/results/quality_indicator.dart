@@ -158,8 +158,9 @@ class QualityIndicator extends StatelessWidget {
   String _getQualityDescription(double confidence) {
     if (confidence >= 0.8) return 'Détection très fiable, résultats optimaux';
     if (confidence >= 0.6) return 'Bonne détection, résultats utilisables';
-    if (confidence >= 0.4)
+    if (confidence >= 0.4) {
       return 'Détection moyenne, à interpréter avec prudence';
+    }
     return 'Détection faible, vérification recommandée';
   }
 

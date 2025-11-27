@@ -79,7 +79,7 @@ class _VideoConfirmPageState extends State<VideoConfirmPage> {
                     label: 'Reprendre la vidéo',
                     height: 52,
                     onPressed: () {
-                      context.go('/camera');
+                      context.pop(); // Revenir à la caméra
                     },
                     backgroundColor: const Color(0xFFEDEDED),
                     borderColor: Colors.transparent,
