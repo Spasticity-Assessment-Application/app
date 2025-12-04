@@ -2,7 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:poc/features/home/presentation/home_page.dart';
 import 'package:poc/features/camera/camera.dart';
 import 'package:poc/features/photo_display/photo_display.dart';
-import 'package:poc/features/analysis/presentation/analysis_page.dart';
+import 'package:poc/features/analysis/presentation/pages/analysis_page.dart';
 import 'package:poc/features/camera_video/presentation/video_confirm_page.dart';
 import 'package:poc/features/patient/presentation/patients_page.dart';
 import 'package:poc/features/patient/presentation/add_patient_page.dart';
