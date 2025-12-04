@@ -34,9 +34,13 @@ class PoseResultsPage extends StatelessWidget {
 
             return Column(
               children: [
-                const PageHeader(
+                PageHeader(
                   title: 'Résultats',
                   foregroundColor: Colors.black,
+                  onBack: () {
+                    context.pop();
+                    context.push('/video-confirm', extra: state.videoPath);
+                  },
                 ),
                 Expanded(
                   child: SingleChildScrollView(

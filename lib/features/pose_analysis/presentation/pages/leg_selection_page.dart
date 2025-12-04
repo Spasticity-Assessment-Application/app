@@ -32,9 +32,13 @@ class _LegSelectionPageState extends State<LegSelectionPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const PageHeader(
+            PageHeader(
               title: 'Sélection de la jambe',
               foregroundColor: Colors.black,
+              onBack: () {
+                context.pop();
+                context.push('/video-confirm', extra: widget.videoPath);
+              },
             ),
             Expanded(
               child: BlocBuilder<PoseCubit, PoseState>(
@@ -72,7 +76,10 @@ class _LegSelectionPageState extends State<LegSelectionPage> {
                     label: 'Continuer',
                     onPressed: () {
                       context.read<PoseCubit>().proceedToSetup();
-                      context.push('/pose-setup', extra: widget.videoPath);
+                      context.pushReplacement(
+                        '/pose-setup',
+                        extra: widget.videoPath,
+                      );
                     },
                   );
                 },

@@ -54,9 +54,13 @@ class PoseSetupView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const PageHeader(
+            PageHeader(
               title: 'Configuration Analyse',
               foregroundColor: Colors.black,
+              onBack: () {
+                context.pop();
+                context.push('/video-confirm', extra: videoPath);
+              },
             ),
             Expanded(
               child: BlocBuilder<PoseCubit, PoseState>(
@@ -104,7 +108,7 @@ class PoseSetupView extends StatelessWidget {
                     // Créer un état PoseSetup par défaut si nécessaire
                     context.read<PoseCubit>().setupAnalysis();
                   }
-                  context.push('/pose-loading');
+                  context.pushReplacement('/pose-loading');
                   context.read<PoseCubit>().analyzeVideo(videoPath);
                 },
               ),
