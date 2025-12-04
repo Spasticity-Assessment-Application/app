@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/presentation/widgets/page_header.dart';
 import '../../../../core/presentation/widgets/primary_button.dart';
+import '../../../../core/presentation/widgets/secondary_button.dart';
 import '../../logic/pose_cubit.dart';
 import '../../logic/pose_state.dart';
 import '../../data/pose_repository.dart';
@@ -22,7 +23,7 @@ class _PoseSetupPageState extends State<PoseSetupPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Ne setup que si pas déjà en PoseSetup
       final currentState = context.read<PoseCubit>().state;
       if (currentState is! PoseSetup) {
@@ -31,7 +32,7 @@ class _PoseSetupPageState extends State<PoseSetupPage> {
         if (currentState is LegSideSelection) {
           legSide = currentState.selectedLegSide;
         }
-        context.read<PoseCubit>().setupAnalysis(legSide: legSide);
+        await context.read<PoseCubit>().setupAnalysis(legSide: legSide);
       }
     });
   }
@@ -99,18 +100,29 @@ class PoseSetupView extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: PrimaryButton(
-                label: 'Démarrer Analyse',
-                onPressed: () {
-                  // S'assurer que l'état est PoseSetup avant de lancer l'analyse
-                  final currentState = context.read<PoseCubit>().state;
-                  if (currentState is! PoseSetup) {
-                    // Créer un état PoseSetup par défaut si nécessaire
-                    context.read<PoseCubit>().setupAnalysis();
-                  }
-                  context.pushReplacement('/pose-loading');
-                  context.read<PoseCubit>().analyzeVideo(videoPath);
-                },
+              child: Column(
+                children: [
+                  SecondaryButton(
+                    label: 'Réinitialiser aux paramètres par défaut',
+                    onPressed: () async {
+                      await context.read<PoseCubit>().resetToDefaults();
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  PrimaryButton(
+                    label: 'Démarrer Analyse',
+                    onPressed: () async {
+                      // S'assurer que l'état est PoseSetup avant de lancer l'analyse
+                      final currentState = context.read<PoseCubit>().state;
+                      if (currentState is! PoseSetup) {
+                        // Créer un état PoseSetup par défaut si nécessaire
+                        await context.read<PoseCubit>().setupAnalysis();
+                      }
+                      context.pushReplacement('/pose-loading');
+                      context.read<PoseCubit>().analyzeVideo(videoPath);
+                    },
+                  ),
+                ],
               ),
             ),
           ],

@@ -74,8 +74,8 @@ class _LegSelectionPageState extends State<LegSelectionPage> {
                 builder: (context, state) {
                   return PrimaryButton(
                     label: 'Continuer',
-                    onPressed: () {
-                      context.read<PoseCubit>().proceedToSetup();
+                    onPressed: () async {
+                      await context.read<PoseCubit>().proceedToSetup();
                       context.pushReplacement(
                         '/pose-setup',
                         extra: widget.videoPath,

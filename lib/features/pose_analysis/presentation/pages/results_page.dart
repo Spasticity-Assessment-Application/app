@@ -76,8 +76,8 @@ class PoseResultsPage extends StatelessWidget {
                       const SizedBox(height: 12),
                       SecondaryButton(
                         label: 'Nouvelle analyse',
-                        onPressed: () {
-                          context.read<PoseCubit>().reset();
+                        onPressed: () async {
+                          await context.read<PoseCubit>().setupAnalysis();
                           context.go('/analyse');
                         },
                       ),

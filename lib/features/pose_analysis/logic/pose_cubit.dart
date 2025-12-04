@@ -7,13 +7,19 @@ import 'package:video_player/video_player.dart';
 import '../data/pose_repository.dart';
 import '../domain/leg_side.dart';
 import 'pose_state.dart';
+import '../../../core/data/analysis_preferences_repository.dart';
 
 class PoseCubit extends Cubit<PoseState> {
   final PoseRepository _repository;
+  final AnalysisPreferencesRepository _preferencesRepository;
 
-  PoseCubit({PoseRepository? repository})
-    : _repository = repository ?? PoseRepository(),
-      super(PoseInitial());
+  PoseCubit({
+    PoseRepository? repository,
+    AnalysisPreferencesRepository? preferencesRepository,
+  }) : _repository = repository ?? PoseRepository(),
+       _preferencesRepository =
+           preferencesRepository ?? AnalysisPreferencesRepository.instance,
+       super(PoseInitial());
 
   void initializeLegSelection(String videoPath) {
     emit(
@@ -28,38 +34,47 @@ class PoseCubit extends Cubit<PoseState> {
     }
   }
 
-  void proceedToSetup() {
+  Future<void> proceedToSetup() async {
     final currentState = state;
     if (currentState is LegSideSelection) {
-      setupAnalysis(legSide: currentState.selectedLegSide);
+      await setupAnalysis(legSide: currentState.selectedLegSide);
     }
   }
 
-  void setupAnalysis({
-    bool isAdvancedMode = false,
+  Future<void> setupAnalysis({
+    bool? isAdvancedMode,
     PoseModel? model,
     int? frameCount,
     double? threshold,
     LegSide? legSide,
-  }) {
+  }) async {
+    // Charger les préférences sauvegardées
+    final prefs = await _preferencesRepository.loadAll();
+
+    // Convertir le string du modèle en PoseModel enum
+    PoseModel savedModel = PoseModel.mnv3l;
+    if (prefs.model == 'mnv3s') {
+      savedModel = PoseModel.mnv3s;
+    }
+
     emit(
       PoseSetup(
-        selectedModel: model ?? PoseModel.mnv3l,
-        frameCount: frameCount ?? 60,
-        threshold: threshold ?? 0.0,
-        isAdvancedMode: isAdvancedMode,
+        selectedModel: model ?? savedModel,
+        frameCount: frameCount ?? prefs.frameCount,
+        threshold: threshold ?? prefs.threshold,
+        isAdvancedMode: isAdvancedMode ?? prefs.isAdvancedMode,
         legSide: legSide ?? LegSide.right,
       ),
     );
   }
 
-  void updateSetup({
+  Future<void> updateSetup({
     PoseModel? model,
     int? frameCount,
     double? threshold,
     bool? isAdvancedMode,
     LegSide? legSide,
-  }) {
+  }) async {
     PoseSetup currentSetup;
     if (state is PoseSetup) {
       currentSetup = state as PoseSetup;
@@ -74,15 +89,25 @@ class PoseCubit extends Cubit<PoseState> {
       );
     }
 
-    emit(
-      currentSetup.copyWith(
-        selectedModel: model,
-        frameCount: frameCount,
-        threshold: threshold,
-        isAdvancedMode: isAdvancedMode,
-        legSide: legSide,
+    final newSetup = currentSetup.copyWith(
+      selectedModel: model,
+      frameCount: frameCount,
+      threshold: threshold,
+      isAdvancedMode: isAdvancedMode,
+      legSide: legSide,
+    );
+
+    // Sauvegarder les nouvelles préférences
+    await _preferencesRepository.saveAll(
+      AnalysisPreferences(
+        model: newSetup.selectedModel.name,
+        frameCount: newSetup.frameCount,
+        threshold: newSetup.threshold,
+        isAdvancedMode: newSetup.isAdvancedMode,
       ),
     );
+
+    emit(newSetup);
   }
 
   Future<void> analyzeVideo(String videoPath) async {
@@ -241,9 +266,12 @@ class PoseCubit extends Cubit<PoseState> {
     }
   }
 
-  void reset() {
-    // Reset to setup page with default configuration
-    setupAnalysis(
+  Future<void> resetToDefaults() async {
+    // Réinitialiser les préférences aux valeurs par défaut
+    await _preferencesRepository.resetToDefaults();
+
+    // Recharger l'état avec les valeurs par défaut
+    await setupAnalysis(
       isAdvancedMode: false,
       model: PoseModel.mnv3l,
       frameCount: 60,
