@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
+import '../domain/leg_side.dart';
 
 enum PoseModel {
   mnv3l('assets/models/pose_model_mnv3l_float32.tflite', 384, 96),
@@ -11,6 +12,16 @@ enum PoseModel {
   final int inputSize;
   final int outputSize;
   const PoseModel(this.path, this.inputSize, this.outputSize);
+
+  /// Retourne le chemin du modèle en fonction du côté de la jambe
+  ///
+  /// Actuellement, utilise les mêmes modèles pour les deux côtés de la jambe.
+  /// Cette méthode permet une extension future pour des modèles spécialisés
+  /// par côté de jambe si nécessaire.
+  String getPathForLegSide(LegSide legSide) {
+    // Utilise le même modèle pour les deux côtés de la jambe
+    return path;
+  }
 }
 
 class Keypoint {
@@ -69,19 +80,21 @@ class PoseRepository {
 
   static const List<String> _keypointNames = ['Hanche', 'Genou', 'Cheville'];
 
-  Future<void> initialize(PoseModel model) async {
+  Future<void> initialize(PoseModel model, LegSide legSide) async {
     if (_isInitialized) {
       await dispose();
     }
 
     try {
-      print('🔵 Initializing model: ${model.path}');
+      final modelPath = model.getPathForLegSide(legSide);
+      print('🔵 Initializing model: $modelPath');
+      print('🦵 Leg side: ${legSide.displayName}');
       print(
         '📊 Model specs: input ${model.inputSize}x${model.inputSize}, output ${model.outputSize}x${model.outputSize}',
       );
       final options = InterpreterOptions()..threads = 4;
 
-      _interpreter = await Interpreter.fromAsset(model.path, options: options);
+      _interpreter = await Interpreter.fromAsset(modelPath, options: options);
       print('✅ Interpreter created');
       _interpreter!.allocateTensors();
       print('✅ Tensors allocated');

@@ -47,6 +47,13 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/leg-selection',
+        builder: (context, state) {
+          final videoPath = state.extra as String? ?? '';
+          return LegSelectionPage(videoPath: videoPath);
+        },
+      ),
+      GoRoute(
         path: '/pose-setup',
         builder: (context, state) {
           final videoPath = state.extra as String? ?? '';

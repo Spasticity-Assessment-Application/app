@@ -27,6 +27,7 @@ class CurrentSettingsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          _buildSettingRow('Jambe', state.legSide.displayName),
           _buildSettingRow(
             'Précision',
             _getModelDisplayName(state.selectedModel),

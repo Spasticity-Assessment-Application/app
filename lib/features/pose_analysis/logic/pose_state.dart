@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../data/pose_repository.dart';
+import '../domain/leg_side.dart';
 
 abstract class PoseState extends Equatable {
   @override
@@ -8,17 +9,36 @@ abstract class PoseState extends Equatable {
 
 class PoseInitial extends PoseState {}
 
+class LegSideSelection extends PoseState {
+  final LegSide selectedLegSide;
+  final String videoPath;
+
+  LegSideSelection({required this.selectedLegSide, required this.videoPath});
+
+  @override
+  List<Object?> get props => [selectedLegSide, videoPath];
+
+  LegSideSelection copyWith({LegSide? selectedLegSide, String? videoPath}) {
+    return LegSideSelection(
+      selectedLegSide: selectedLegSide ?? this.selectedLegSide,
+      videoPath: videoPath ?? this.videoPath,
+    );
+  }
+}
+
 class PoseSetup extends PoseState {
   final PoseModel selectedModel;
   final int frameCount;
   final double threshold;
   final bool isAdvancedMode;
+  final LegSide legSide;
 
   PoseSetup({
     required this.selectedModel,
     required this.frameCount,
     required this.threshold,
     required this.isAdvancedMode,
+    required this.legSide,
   });
 
   @override
@@ -27,6 +47,7 @@ class PoseSetup extends PoseState {
     frameCount,
     threshold,
     isAdvancedMode,
+    legSide,
   ];
 
   PoseSetup copyWith({
@@ -34,12 +55,14 @@ class PoseSetup extends PoseState {
     int? frameCount,
     double? threshold,
     bool? isAdvancedMode,
+    LegSide? legSide,
   }) {
     return PoseSetup(
       selectedModel: selectedModel ?? this.selectedModel,
       frameCount: frameCount ?? this.frameCount,
       threshold: threshold ?? this.threshold,
       isAdvancedMode: isAdvancedMode ?? this.isAdvancedMode,
+      legSide: legSide ?? this.legSide,
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:video_player/video_player.dart';
 import '../data/pose_repository.dart';
+import '../domain/leg_side.dart';
 import 'pose_state.dart';
 
 class PoseCubit extends Cubit<PoseState> {
@@ -14,11 +15,32 @@ class PoseCubit extends Cubit<PoseState> {
     : _repository = repository ?? PoseRepository(),
       super(PoseInitial());
 
+  void initializeLegSelection(String videoPath) {
+    emit(
+      LegSideSelection(selectedLegSide: LegSide.right, videoPath: videoPath),
+    );
+  }
+
+  void updateLegSide(LegSide legSide) {
+    final currentState = state;
+    if (currentState is LegSideSelection) {
+      emit(currentState.copyWith(selectedLegSide: legSide));
+    }
+  }
+
+  void proceedToSetup() {
+    final currentState = state;
+    if (currentState is LegSideSelection) {
+      setupAnalysis(legSide: currentState.selectedLegSide);
+    }
+  }
+
   void setupAnalysis({
     bool isAdvancedMode = false,
     PoseModel? model,
     int? frameCount,
     double? threshold,
+    LegSide? legSide,
   }) {
     emit(
       PoseSetup(
@@ -26,6 +48,7 @@ class PoseCubit extends Cubit<PoseState> {
         frameCount: frameCount ?? 60,
         threshold: threshold ?? 0.0,
         isAdvancedMode: isAdvancedMode,
+        legSide: legSide ?? LegSide.right,
       ),
     );
   }
@@ -35,6 +58,7 @@ class PoseCubit extends Cubit<PoseState> {
     int? frameCount,
     double? threshold,
     bool? isAdvancedMode,
+    LegSide? legSide,
   }) {
     PoseSetup currentSetup;
     if (state is PoseSetup) {
@@ -46,6 +70,7 @@ class PoseCubit extends Cubit<PoseState> {
         frameCount: 60,
         threshold: 0.0,
         isAdvancedMode: false,
+        legSide: LegSide.right,
       );
     }
 
@@ -55,6 +80,7 @@ class PoseCubit extends Cubit<PoseState> {
         frameCount: frameCount,
         threshold: threshold,
         isAdvancedMode: isAdvancedMode,
+        legSide: legSide,
       ),
     );
   }
@@ -69,7 +95,10 @@ class PoseCubit extends Cubit<PoseState> {
 
     try {
       print('🔵 Starting analysis with model: ${setup.selectedModel.name}');
-      await _repository.initialize(setup.selectedModel);
+      print('🦵 Analyzing leg side: ${setup.legSide.displayName}');
+
+      // Charger le modèle approprié selon le côté de la jambe
+      await _repository.initialize(setup.selectedModel, setup.legSide);
       print('✅ Model initialized successfully');
 
       final videoFile = File(videoPath);

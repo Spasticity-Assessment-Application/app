@@ -89,7 +89,7 @@ class _VideoConfirmPageState extends State<VideoConfirmPage> {
                     label: "Démarrer l'analyse",
                     height: 52,
                     onPressed: () {
-                      context.push('/pose-setup', extra: widget.videoPath);
+                      context.push('/leg-selection', extra: widget.videoPath);
                     },
                   ),
                 ],

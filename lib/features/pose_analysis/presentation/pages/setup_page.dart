@@ -6,6 +6,7 @@ import '../../../../core/presentation/widgets/primary_button.dart';
 import '../../logic/pose_cubit.dart';
 import '../../logic/pose_state.dart';
 import '../../data/pose_repository.dart';
+import '../../domain/leg_side.dart';
 import '../widgets/widgets.dart';
 
 class PoseSetupPage extends StatefulWidget {
@@ -22,10 +23,15 @@ class _PoseSetupPageState extends State<PoseSetupPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Only setup if not already in PoseSetup state
+      // Ne setup que si pas déjà en PoseSetup
       final currentState = context.read<PoseCubit>().state;
       if (currentState is! PoseSetup) {
-        context.read<PoseCubit>().setupAnalysis();
+        // Essayer de récupérer le LegSide depuis l'état précédent
+        LegSide legSide = LegSide.right;
+        if (currentState is LegSideSelection) {
+          legSide = currentState.selectedLegSide;
+        }
+        context.read<PoseCubit>().setupAnalysis(legSide: legSide);
       }
     });
   }
@@ -66,6 +72,7 @@ class PoseSetupView extends StatelessWidget {
                       frameCount: 60,
                       threshold: 0.0,
                       isAdvancedMode: false,
+                      legSide: LegSide.right,
                     );
                   }
                   return SingleChildScrollView(
