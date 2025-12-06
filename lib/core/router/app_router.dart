@@ -8,6 +8,7 @@ import 'package:poc/features/patient/presentation/patients_page.dart';
 import 'package:poc/features/patient/presentation/add_patient_page.dart';
 import 'package:poc/features/patient/presentation/patient_detail_page.dart';
 import 'package:poc/features/pose_analysis/pose_analysis.dart';
+import 'package:poc/features/patient/presentation/saved_result_page.dart';
 
 class AppRouter {
   GoRouter get router => GoRouter(
@@ -67,6 +68,13 @@ class AppRouter {
       GoRoute(
         path: '/pose-results',
         builder: (context, state) => const PoseResultsPage(),
+      ),
+      GoRoute(
+        path: '/saved-result',
+        builder: (context, state) {
+          final csvPath = state.extra as String? ?? '';
+          return SavedResultPage(csvPath: csvPath);
+        },
       ),
     ],
   );

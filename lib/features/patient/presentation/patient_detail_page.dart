@@ -13,7 +13,7 @@ import 'package:poc/features/patient/domain/patient.dart';
 import 'package:poc/core/data/analysis_db.dart';
 
 class PatientDetailPage extends StatefulWidget {
-  final int index; 
+  final int index;
   const PatientDetailPage({super.key, required this.index});
 
   @override
@@ -25,7 +25,6 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
   Patient? _patient;
   bool _loading = true;
 
- 
   List<Map<String, dynamic>> _history = [];
 
   @override
@@ -39,13 +38,11 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
     if (!mounted) return;
 
     if (widget.index < 0 || widget.index >= list.length) {
-      context.pop(); 
+      context.pop();
       return;
     }
 
     final p = list[widget.index];
-
-  
     final history = await AnalysisDb.instance.getCsvForPatient(p.email);
 
     if (!mounted) return;
@@ -105,7 +102,7 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
 
     await _repo.delete(widget.index);
     if (!mounted) return;
-    context.pop(true); 
+    context.pop(true);
   }
 
   @override
@@ -124,7 +121,6 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
         child: Column(
           children: [
             PageHeader(title: p.name),
-
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(
@@ -139,21 +135,18 @@ class _PatientDetailPageState extends State<PatientDetailPage> {
                     label: 'Notes',
                     value: p.notes?.isNotEmpty == true ? p.notes! : '—',
                   ),
-
                   const SizedBox(height: 16),
                   const Text(
                     'Historique des analyses',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
-
                   _history.isEmpty
                       ? const _HistoryEmpty()
                       : _HistoryList(history: _history),
                 ],
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
@@ -250,26 +243,19 @@ class _HistoryList extends StatelessWidget {
         return;
       }
 
-
       final bytes = await file.readAsBytes();
-
 
       final savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Exporter le CSV',
         fileName: p.basename(csvPath),
         type: FileType.custom,
         allowedExtensions: ['csv'],
-        bytes: bytes, 
+        bytes: bytes,
       );
 
       if (savePath == null) {
-     
         return;
       }
-
-      // Écrire les bytes à l’emplacement choisi
-      //final outFile = File(savePath);
-      //await outFile.writeAsBytes(bytes, flush: true);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -322,8 +308,25 @@ class _HistoryList extends StatelessWidget {
               subtitle,
               style: const TextStyle(fontSize: 12, color: Colors.black54),
             ),
-            trailing: const Icon(Icons.download, size: 18),
-            onTap: () => _exportCsv(context, csvPath),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    context.push('/saved-result', extra: csvPath);
+                  },
+                  child: const Text(
+                    'Ouvrir\nrésultats',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.download, size: 18),
+                  onPressed: () => _exportCsv(context, csvPath),
+                ),
+              ],
+            ),
           );
         },
       ),
