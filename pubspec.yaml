@@ -75,7 +75,9 @@ flutter:
   assets:
     - assets/models/
     - assets/models/pose_model_mnv3l_float32.tflite
+    - assets/models/pose_model_mnv3l_g_float32.tflite
     - assets/models/pose_model_mnv3s_float32.tflite
+    - assets/models/pose_model_mnv3s_g_float32.tflite
     - assets/logo_spasticity.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

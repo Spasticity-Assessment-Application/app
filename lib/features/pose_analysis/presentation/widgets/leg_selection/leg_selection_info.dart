@@ -17,7 +17,7 @@ class LegSelectionInfo extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Le choix du côté permet d\'utiliser le modèle d\'analyse approprié pour des résultats plus précis.',
+              'Le choix du côté est important : chaque jambe utilise un modèle d\'analyse spécifique entraîné pour ce côté, garantissant des résultats plus précis.',
               style: const TextStyle(fontSize: 13, color: Colors.black87),
             ),
           ),

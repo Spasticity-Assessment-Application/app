@@ -5,22 +5,37 @@ import 'package:image/image.dart' as img;
 import '../domain/leg_side.dart';
 
 enum PoseModel {
-  mnv3l('assets/models/pose_model_mnv3l_float32.tflite', 384, 96),
-  mnv3s('assets/models/pose_model_mnv3s_float32.tflite', 256, 64);
+  mnv3l(
+    'assets/models/pose_model_mnv3l_float32.tflite',
+    'assets/models/pose_model_mnv3l_g_float32.tflite',
+    384,
+    96,
+  ),
+  mnv3s(
+    'assets/models/pose_model_mnv3s_float32.tflite',
+    'assets/models/pose_model_mnv3s_g_float32.tflite',
+    256,
+    64,
+  );
 
-  final String path;
+  final String rightLegPath;
+  final String leftLegPath;
   final int inputSize;
   final int outputSize;
-  const PoseModel(this.path, this.inputSize, this.outputSize);
+  const PoseModel(
+    this.rightLegPath,
+    this.leftLegPath,
+    this.inputSize,
+    this.outputSize,
+  );
 
   /// Retourne le chemin du modèle en fonction du côté de la jambe
   ///
-  /// Actuellement, utilise les mêmes modèles pour les deux côtés de la jambe.
-  /// Cette méthode permet une extension future pour des modèles spécialisés
-  /// par côté de jambe si nécessaire.
+  /// Utilise des modèles spécialisés pour chaque côté de la jambe.
+  /// - Jambe droite : utilise rightLegPath
+  /// - Jambe gauche : utilise leftLegPath
   String getPathForLegSide(LegSide legSide) {
-    // Utilise le même modèle pour les deux côtés de la jambe
-    return path;
+    return legSide == LegSide.right ? rightLegPath : leftLegPath;
   }
 }
 
